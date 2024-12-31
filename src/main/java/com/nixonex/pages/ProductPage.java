@@ -10,18 +10,23 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+
 public class ProductPage {
     WebDriver driver;
+
 
     // Locators
     @FindBy(linkText = "Laptops")
     WebElement laptopsCategory;
 
+
     @FindBy(xpath = "//a[contains(text(),'Sony vaio i5')]")
     WebElement productLink;
 
+
     @FindBy(xpath = "//a[contains(text(),'Add to cart')]")
     WebElement addToCartButton;
+
 
     public ProductPage(WebDriver driver) {
         this.driver = driver;
@@ -47,10 +52,10 @@ public class ProductPage {
             // Print the alert message for debugging
             System.out.println("Alert message: " + alert.getText());
             // Accept the alert to dismiss it
+            Thread.sleep(1000);
             alert.accept();
         } catch (Exception e) {
             System.err.println("No alert appeared or it was already handled.");
         }
     }
-
 }
