@@ -8,8 +8,8 @@ import com.nixonex.utils.ExtentManager;
 import com.nixonex.utils.ScreenshotUtil;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.time.Duration;
@@ -19,7 +19,12 @@ public class CompleteTest {
     private static ExtentReports extent;
     private ExtentTest test;
 
-    @BeforeMethod
+    private RegisterPage registerPage;
+    private LoginPage loginPage;
+    private ProductPage productPage;
+    private CheckoutPage checkoutPage;
+
+    @BeforeClass
     public void setup() {
         driver = new ChromeDriver();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
@@ -27,9 +32,16 @@ public class CompleteTest {
         driver.get("https://www.demoblaze.com/");
 
         extent = ExtentManager.getExtentReports();
+        
+        // Initialize page objects
+        registerPage = new RegisterPage(driver);
+        loginPage = new LoginPage(driver);
+        productPage = new ProductPage(driver);
+        checkoutPage = new CheckoutPage(driver);
     }
 
-    @AfterMethod
+
+    @AfterClass
     public void tearDown() {
         if (driver != null) {
             driver.quit();
@@ -39,52 +51,78 @@ public class CompleteTest {
         }
     }
 
-    @Test
-    public void testCompleteWorkflow() {
-        test = extent.createTest("Complete Workflow Test");
+
+    @Test(priority = 1)
+    public void testRegistration() {
+        test = extent.createTest("Registration Test");
         try {
-            // **Registration**
             test.info("Starting Registration Process");
-            RegisterPage registerPage = new RegisterPage(driver);
             registerPage.clickSignUpLink();
             Thread.sleep(2000);
             registerPage.enterUsername("manasatest");
             registerPage.enterPassword("password123");
             registerPage.clickSignUpButton();
             Thread.sleep(2000);
+
+
             String regScreenshot = ScreenshotUtil.takeScreenshot(driver, "Registration");
             test.pass("Registration completed",
                 MediaEntityBuilder.createScreenCaptureFromPath(regScreenshot).build());
+        } catch (Exception e) {
+            handleFailure(e, "Registration Failure");
+        }
+    }
 
-            // **Login**
+
+    @Test(priority = 2, dependsOnMethods = "testRegistration")
+    public void testLogin() {
+        test = extent.createTest("Login Test");
+        try {
             test.info("Starting Login Process");
-            LoginPage loginPage = new LoginPage(driver);
             loginPage.clickLoginLink();
             Thread.sleep(2000);
             loginPage.enterUsername("manasatest");
             loginPage.enterPassword("password123");
             loginPage.clickLoginButton();
-            Thread.sleep(2000);
+            Thread.sleep(5000);
+
+
             String loginScreenshot = ScreenshotUtil.takeScreenshot(driver, "Login");
             test.pass("Login successful",
                 MediaEntityBuilder.createScreenCaptureFromPath(loginScreenshot).build());
+        } catch (Exception e) {
+            handleFailure(e, "Login Failure");
+        }
+    }
 
-            // **Add to Cart**
+
+    @Test(priority = 3, dependsOnMethods = "testLogin")
+    public void testAddToCart() {
+        test = extent.createTest("Add to Cart Test");
+        try {
             test.info("Adding product to cart");
-            ProductPage productPage = new ProductPage(driver);
             productPage.selectLaptopsCategory();
             Thread.sleep(2000);
             productPage.selectProduct();
             Thread.sleep(2000);
             productPage.addToCart();
-            Thread.sleep(2000);
+            Thread.sleep(500);
+
+
             String addToCartScreenshot = ScreenshotUtil.takeScreenshot(driver, "AddToCart");
             test.pass("Product added to cart",
                 MediaEntityBuilder.createScreenCaptureFromPath(addToCartScreenshot).build());
+        } catch (Exception e) {
+            handleFailure(e, "Add to Cart Failure");
+        }
+    }
 
-            // **Checkout**
+
+    @Test(priority = 4, dependsOnMethods = "testAddToCart")
+    public void testCheckout() {
+        test = extent.createTest("Checkout Test");
+        try {
             test.info("Starting Checkout Process");
-            CheckoutPage checkoutPage = new CheckoutPage(driver);
             checkoutPage.openCart();
             Thread.sleep(2000);
             checkoutPage.clickPlaceOrder();
@@ -92,15 +130,26 @@ public class CompleteTest {
             checkoutPage.fillDetails("John Doe", "USA", "New York", "1234567812345678", "12", "2025");
             checkoutPage.clickPurchase();
             Thread.sleep(2000);
+
+
             String checkoutScreenshot = ScreenshotUtil.takeScreenshot(driver, "Checkout");
             test.pass("Checkout completed",
                 MediaEntityBuilder.createScreenCaptureFromPath(checkoutScreenshot).build());
-
         } catch (Exception e) {
-            // Capture failure screenshot
-            String failureScreenshot = ScreenshotUtil.takeScreenshot(driver, "Failure");
+            handleFailure(e, "Checkout Failure");
+        }
+    }
+
+
+    private void handleFailure(Exception e, String testName) {
+        try {
+            String failureScreenshot = ScreenshotUtil.takeScreenshot(driver, testName);
             test.fail("Test failed: " + e.getMessage(),
                 MediaEntityBuilder.createScreenCaptureFromPath(failureScreenshot).build());
+        } catch (Exception screenshotException) {
+            test.fail("Failed to capture screenshot: " + screenshotException.getMessage());
         }
     }
 }
+
+
