@@ -10,37 +10,59 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+
 public class RegisterPage {
     WebDriver driver;
+
 
     @FindBy(id = "signin2")
     WebElement signUpLink;
 
+
     @FindBy(id = "sign-username")
     WebElement usernameField;
+
 
     @FindBy(id = "sign-password")
     WebElement passwordField;
 
+
     @FindBy(xpath = "//button[contains(text(),'Sign up')]")
     WebElement signUpButton;
+    
+    @FindBy(xpath = "//button[contains(text(),'Close')]")
+    WebElement signUpCloseButton;
+
 
     public RegisterPage(WebDriver driver) {
         this.driver = driver;
         PageFactory.initElements(driver, this);
     }
 
+
     public void clickSignUpLink() {
         signUpLink.click();
     }
+    
+    public void clickSignUpCloseBtn() {
+      signUpCloseButton.click();
+    }
+
 
     public void enterUsername(String username) {
         usernameField.sendKeys(username);
     }
 
+
     public void enterPassword(String password) {
         passwordField.sendKeys(password);
     }
+    
+    public void clearFields() {
+      usernameField.clear();
+      passwordField.clear();
+    }
+
 
     public void clickSignUpButton() {
         signUpButton.click();
